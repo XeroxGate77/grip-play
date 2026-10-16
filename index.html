@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Subjugated Dialectics — Play</title>
+<meta name="description" content="Redesigned standalone Play page for Subjugated Dialectics (engine77). Offline, no network calls.">
+<style>:root{--bg:#0f1113;--card:#181b1e;--panel:#202428;--line:#2e3439;--text:#ece6d8;--muted:#9aa3ab;--amber:#f0b040;--amber-d:#e0a030;--rust:#c8553a;--steel:#8fa5b8;--ok:#7fbf8a;
+--r:14px;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans","Helvetica Neue",Arial,sans-serif;color-scheme:dark}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--text);font-size:16px;line-height:1.45}
+#app{display:flex;justify-content:center;padding:24px 16px 48px}
+.card{width:100%;max-width:760px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:28px;box-shadow:0 20px 60px #0008;display:flex;flex-direction:column;gap:16px}
+.card.wide{max-width:1100px}
+.title{margin:0;font-size:clamp(26px,4vw,38px);letter-spacing:.02em;color:var(--amber);font-weight:800}.title.r{font-size:28px}
+.subtitle{margin:-8px 0 4px;color:var(--muted);font-size:15px;text-transform:uppercase;letter-spacing:.14em}
+.menu{display:flex;flex-direction:column;gap:10px}
+.menu-item{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;text-align:left;gap:2px 16px;padding:16px 20px;min-height:72px;border-radius:var(--r);background:var(--panel);border:1px solid var(--line);color:var(--text);cursor:pointer;font:inherit;transition:border-color .15s,transform .15s,background .15s}
+.menu-item:hover,.menu-item:focus-visible{border-color:var(--amber);background:#262a2f;outline:none;transform:translateY(-1px)}
+.mi-title{font-size:20px;font-weight:700}.mi-desc{color:var(--muted);font-size:15px;grid-row:2}.mi-arrow{grid-row:1/3;grid-column:2;align-self:center;font-size:22px;color:var(--amber)}
+.menu-item[data-id=auto]{border-color:#5a4520;background:linear-gradient(90deg,#2a2418,#20242b)}
+.btn{font:inherit;font-size:16px;font-weight:600;padding:12px 18px;min-height:48px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--text);cursor:pointer;transition:border-color .15s,background .15s,opacity .15s}
+.btn:hover:not(:disabled),.btn:focus-visible{border-color:var(--amber);outline:none}.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:var(--amber);color:#1a1307;border-color:var(--amber)}.btn.primary:hover{background:#ffc45a}
+.btn.ghost{background:transparent}.btn.small{min-height:38px;padding:8px 12px;font-size:14px}
+.crumb{color:var(--muted);font-size:13px;letter-spacing:.12em;text-transform:uppercase;font-weight:600}
+.order{background:var(--panel);border-radius:var(--r);padding:18px 20px;border-left:4px solid var(--amber);min-height:138px}
+.order-title{margin:0 0 6px;font-size:clamp(20px,3vw,26px);color:var(--amber);font-weight:800;letter-spacing:.01em}
+.order-text{margin:0;font-size:17px}.order-note{margin:8px 0 0;color:var(--steel);font-size:14px;min-height:1.4em}
+.meter{display:flex;flex-direction:column;gap:6px}
+.meter-label{display:grid;grid-template-columns:1fr auto auto 1fr;gap:10px;align-items:baseline;font-size:13px;color:var(--muted);margin-top:6px}
+.ml-end.r{text-align:right}.ml-name{font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.08em}.ml-val{font-size:22px;font-weight:800;color:var(--amber);font-variant-numeric:tabular-nums;min-width:4ch;text-align:right}
+.has-tip{cursor:help}
+.bar{position:relative;height:26px;border-radius:8px;background:#121416;border:1px solid var(--line);overflow:hidden}
+.bar .fill{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#7a2f1d,var(--rust) 60%,#e07a3a);transition:width .35s ease}
+.bar.grip.inband .fill{background:linear-gradient(90deg,#7a5a1d,var(--amber))}
+.bar .band{position:absolute;left:45%;width:10%;top:0;bottom:0;background:rgba(240,176,64,.18);border-left:1px dashed #f0b04080;border-right:1px dashed #f0b04080}
+.bar .tick{position:absolute;top:0;bottom:0;width:1px;background:rgba(236,230,216,.12)}
+.bar .warn{position:absolute;top:0;bottom:0;width:2px;background:rgba(200,85,58,.85)}
+.bar .centre{position:absolute;left:50%;top:-2px;bottom:-2px;width:2px;background:var(--amber);transform:translateX(-1px)}
+.bar.pub{height:12px}.bar.pub .fill{background:var(--steel);transition:left .35s,width .35s}
+.micro{width:100%;height:8px;display:block}
+.chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.chip{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:2px}
+.chip-l{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}.chip-v{font-size:16px;font-weight:700;font-variant-numeric:tabular-nums}
+.chip.ok{border-color:#3f6b48}.chip.ok .chip-v{color:var(--ok)}.chip.warn{border-color:#6b3a2a}.chip.warn .chip-v{color:#f08a6a}
+.lens{min-height:44px;display:flex;flex-direction:column;gap:8px}.lens-head{font-size:13px;color:var(--muted)}
+.lens-row{display:grid;grid-template-columns:90px repeat(3,1fr);gap:8px;align-items:center}.lens-t{font-weight:700;color:var(--steel);font-size:14px}
+.lens-b{min-height:40px;font-size:14px;padding:6px 8px}.lens-b.lv1{color:var(--steel)}.lens-b.lv2{color:var(--amber)}.lens-b.on,.toggle.on{border-color:var(--amber);background:#33291a;color:var(--amber)}
+.seen{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;background:var(--panel);border-radius:10px;padding:10px 14px}
+.seen-v{font-variant-numeric:tabular-nums;font-weight:600}.seen-v.lv0{color:var(--muted)}.seen-v.lv1{color:var(--steel)}.seen-v.lv2{color:var(--amber)}
+.actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;min-height:128px;align-content:start}
+.act{min-height:60px;font-size:18px;letter-spacing:.02em}.act.order{font-size:15px}
+.act.obey{border-color:#6b5320}.act.obey:hover:not(:disabled){background:#33291a;border-color:var(--amber)}
+.act.negotiate{border-color:#3d4b57}.act.negotiate:hover:not(:disabled){background:#222c35;border-color:var(--steel)}
+.act.defy{border-color:#6b3020}.act.defy:hover:not(:disabled){background:#35201a;border-color:var(--rust)}
+.act.closed{text-decoration:line-through}.act-note{color:var(--muted);align-self:center;grid-column:1/-1}
+.logwrap{background:#121416;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.log-head{padding:8px 14px;font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);border-bottom:1px solid var(--line)}
+.log{list-style:none;margin:0;padding:6px 0;height:220px;overflow-y:auto;font-size:14px;font-variant-numeric:tabular-nums;overscroll-behavior:contain}
+.ev{display:flex;flex-wrap:wrap;gap:4px 10px;padding:4px 14px;border-left:3px solid transparent}
+.ev.obey{border-left-color:var(--amber-d)}.ev.negotiate{border-left-color:var(--steel)}.ev.defy{border-left-color:var(--rust)}
+.ev-n{color:var(--muted);width:2ch}.ev-cmd{font-weight:600}.ev-arrow{color:var(--muted)}.ev.obey .ev-r{color:var(--amber)}.ev.negotiate .ev-r{color:var(--steel)}.ev.defy .ev-r{color:#f07a5a}
+.ev-g,.ev-o{color:var(--muted)}.ev-tag{font-size:12px;padding:1px 8px;border-radius:99px;background:var(--panel);color:var(--steel)}.ev-tag.t-node{color:#f0a080}
+.foot{display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap}
+.autobar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:#2a2418;border:1px solid #5a4520;border-radius:12px;padding:8px 12px}.ab-s{flex:1 1 240px;color:var(--amber);font-weight:600;font-size:14px}
+.result{display:grid;grid-template-columns:minmax(280px,460px) 1fr;gap:28px;align-items:start}
+@media (max-width:820px){.result{grid-template-columns:1fr}}
+.r-art{position:sticky;top:16px}.art{width:100%;aspect-ratio:1;display:block;border-radius:16px}
+.legend{display:flex;gap:16px;justify-content:center;margin-top:10px;font-size:13px;color:var(--muted)}.lg::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
+.lg.obey::before{background:#e0a030}.lg.negotiate::before{background:#7f95a8}.lg.defy::before{background:#b5472a}
+.r-text{display:flex;flex-direction:column;gap:14px}.rsec{background:var(--panel);border-radius:var(--r);padding:14px 18px}.rsec p{margin:4px 0}
+.rsec-h{margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+.verdict{font-size:18px;font-weight:800}.verdict.yes{color:var(--amber)}.verdict.no{color:#f07a5a}.closing{font-style:italic;margin-top:10px!important}
+.dilemma p{color:var(--amber);font-weight:600}.muted{color:var(--muted);font-size:14px}.small{font-size:12px}
+.code{display:block;word-break:break-all;background:#121416;padding:8px 10px;border-radius:8px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px}
+.row{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}.note{color:var(--steel)}
+.rarity{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.tier{font-weight:800;padding:2px 10px;border-radius:99px;background:#33291a;color:var(--amber)}.tier.mythic{background:#3a1f35;color:#f0a0e0}.tier.rare{background:#1f2c3a;color:#8fc0f0}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}.g-cell{display:flex;flex-direction:column;gap:6px}.thumb{width:100%;aspect-ratio:1;border-radius:12px}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+@media (max-width:560px){.card{padding:18px}.lens-row{grid-template-columns:1fr 1fr 1fr}.lens-t{grid-column:1/-1}}
+</style></head>
+<body><div id="app"></div>
+<noscript>This game needs JavaScript.</noscript>
+<script>window.ERAS={"industrial": {"title": "INDUSTRIAL", "blurb": "Furnaces, shift bells, the foreman's eye.", "commands": [{"name": "RAISE THE QUOTA", "text": "Output up by a fifth. The line is already hot.", "order": 0.3, "output": 0.9, "control": 0.3, "cost": 0.5}, {"name": "RING THE SHIFT BELL", "text": "Bells at dawn, bells at dusk. Rest is a rented hour.", "order": 0.9, "output": 0.1, "control": 0.5, "cost": 0.6}, {"name": "INSTALL THE FOREMAN'S EYE", "text": "Every bench watched. Trust becomes a line item.", "order": 0.5, "output": 0.2, "control": 0.9, "cost": 0.8}, {"name": "OFFER THE BONUS", "text": "A coin for a faster hand. Who counts the missing fingers?", "order": 0.2, "output": 0.4, "control": 0.1, "cost": 0.1}], "closing": {"synthesis": "The machine and the hand found a pace neither owns.", "no_synthesis": "The line kept running. Nobody agreed to it."}}, "prehistoric": {"title": "PRE-HISTORIC", "blurb": "Fire, hunt, taboo, the circle at night.", "commands": [{"name": "DEMAND THE HUNT TRIBUTE", "text": "Half the kill to the fire. The young go hungry first.", "order": 0.3, "output": 0.9, "control": 0.3, "cost": 0.5}, {"name": "ENFORCE THE FIRE TABOO", "text": "No one tends the flame but the chosen. Cold is the price of order.", "order": 0.9, "output": 0.1, "control": 0.5, "cost": 0.6}, {"name": "NAME THE OUTCAST", "text": "One voice is cut from the circle so the rest may sleep.", "order": 0.5, "output": 0.2, "control": 0.9, "cost": 0.8}, {"name": "SHARE THE FEAST", "text": "Bellies full tonight. Tomorrow's debt is not spoken.", "order": 0.2, "output": 0.4, "control": 0.1, "cost": 0.1}], "closing": {"synthesis": "The circle and the wanderer agreed on where the fire sits.", "no_synthesis": "The fire burned on. The circle quietly split."}}, "posttruth": {"title": "POST-TRUTH", "blurb": "Feeds, verdicts, the ranking of facts.", "commands": [{"name": "PUBLISH THE APPROVED FACTS", "text": "One account, repeated until it echoes as memory.", "order": 0.3, "output": 0.9, "control": 0.3, "cost": 0.5}, {"name": "BOOST THE LOYAL FEED", "text": "What is agreed with rises. What is doubted sinks quietly.", "order": 0.9, "output": 0.1, "control": 0.5, "cost": 0.6}, {"name": "FLAG THE DISSENTERS", "text": "A badge for the doubters. Visibility as a leash.", "order": 0.5, "output": 0.2, "control": 0.9, "cost": 0.8}, {"name": "GRANT VERIFIED STATUS", "text": "Trust, sold at a discount to the compliant.", "order": 0.2, "output": 0.4, "control": 0.1, "cost": 0.1}], "closing": {"synthesis": "A shared claim survived being questioned. Rare, and fragile.", "no_synthesis": "Every side kept its facts. Nothing joined them."}}};</script>
+<script>// Port of Subjugated Dialectics play logic (DialecticSim → LensSim → NodeSim v0.1 → V2 → V3 → V4)
+// from the decompiled Godot 4.7.2 source. RNG = Godot RandomPCG (PCG32) incl. float32 randf_range.
+const SD = (() => {
+const M64 = (1n << 64n) - 1n, MUL = 6364136223846793005n, INC_DEFAULT = 1442695040888963407n;
+const f = Math.fround;
+class PCG {
+  constructor(seed) { this.seed = seed; this.inc = ((INC_DEFAULT << 1n) | 1n) & M64; this.state = 0n; this.next(); this.state = (this.state + (BigInt(seed) & M64)) & M64; this.next(); }
+  next() { const old = this.state; this.state = (old * MUL + this.inc) & M64;
+    const xs = Number((((old >> 18n) ^ old) >> 27n) & 0xffffffffn); const rot = Number(old >> 59n);
+    return ((xs >>> rot) | (xs << ((-rot) & 31))) >>> 0; }
+  randf() { const p = this.next(); if (p === 0) return 0; const sig = (this.next() | 0x80000001) >>> 0;
+    return f(f(sig) * Math.pow(2, -32 - Math.clz32(p))); }
+  range(a, b) { a = f(a); b = f(b); return f(f(this.randf() * f(b - a)) + a); }
+}
+const OBEY='obey', NEGOTIATE='negotiate', DEFY='defy';
+const BALANCE_BAND=0.15, BALANCE_HOLD=4;
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const Grid={CELLS:20,CELL_PCT:5,BAND_LO:45,BAND_HI:55,BAND_HALF:0.1,
+  gauge:g=>(g+1)*50, cell:g=>clamp(Math.floor(((g+1)*50)/5),0,19), inBand:g=>Math.abs(g)<0.1};
+const FRAGMENTS={system:['order','output','control'],persona:['autonomy','belonging','purpose']};
+const CODES={'system:order':'O','system:output':'U','system:control':'C','persona:autonomy':'A','persona:belonging':'B','persona:purpose':'P'};
+const HIDDEN=0,BLUR=1,CLEAR=2,ENERGY_CAP=BALANCE_HOLD;
+class Lens { // GridLens (NodeSimV3+)
+  constructor(){this.energy=0;this.out_streak=0;this.levels={system:{order:0,output:0,control:0},persona:{autonomy:0,belonging:0,purpose:0}};}
+  level(t,fr){return this.levels[t][fr];}
+  can_focus(t,fr){return this.energy>=1&&!!FRAGMENTS[t]&&FRAGMENTS[t].includes(fr)&&this.levels[t][fr]<CLEAR;}
+  focus(t,fr){if(!this.can_focus(t,fr))return false;this.energy-=1;this.levels[t][fr]+=1;return true;}
+  end_beat(g){if(Grid.inBand(g)){this.energy=Math.min(this.energy+1,ENERGY_CAP);this.out_streak=0;}else{this.out_streak++;if(this.out_streak%2===0)this.energy=Math.trunc(this.energy/2);}}
+  enough(t){let c=0,s=0;for(const fr of FRAGMENTS[t]){if(this.levels[t][fr]===CLEAR)c++;if(this.levels[t][fr]>=BLUR)s++;}return c>=2||s===3;}
+  both_enough(){return this.enough('system')&&this.enough('persona');}
+  disclosed(t){let n=0;for(const fr of FRAGMENTS[t])n+=this.levels[t][fr];return n;}
+  static view(l,v){if(l===BLUR)return v<0.34?'low':(v<0.67?'mid':'high');if(l===CLEAR)return v.toFixed(2);return '?';}
+  static code_of(t,fr){return CODES[t+':'+fr]||'-';}
+  static from_code(ch){for(const k in CODES)if(CODES[k]===ch)return k.split(':');return [];}
+}
+const M_EMPTY=0,M_T=1,M_A=2,M_S=3;
+class MicroGrid {
+  constructor(){this.state=new Array(100).fill(0);this.tag=new Array(100).fill('');}
+  update(grip,reg){const st=this.state,tg=this.tag,base=Grid.cell(grip)*5;let placed=false;
+    for(let k=0;k<5;k++)if(st[base+k]===M_EMPTY){st[base+k]=M_T;tg[base+k]=reg;placed=true;break;}
+    if(!placed){const want=reg==='care'?M_A:(reg==='resistance'?M_S:-1);
+      for(let k=0;k<5;k++)if(st[base+k]===want){st[base+k]=reg==='care'?M_S:M_A;break;}}
+    let dogma=true;for(let k=0;k<5;k++)if(st[base+k]!==M_T||tg[base+k]!==tg[base]){dogma=false;break;}
+    if(dogma)st[base+4]=M_A;
+    const snap=st.slice(),stag=tg.slice();
+    for(let k=0;k<5;k++){const j=base+k;const nb=[];if(k>0)nb.push(j-1);if(k<4)nb.push(j+1);
+      if(snap[j]===M_T){for(const n of nb)if((snap[n]===M_T&&stag[n]!==stag[j])||snap[n]===M_A){st[j]=M_A;break;}}
+      else if(snap[j]===M_A&&reg==='care'){for(const n of nb)if(snap[n]===M_A||snap[n]===M_S){st[j]=M_S;break;}}}}
+  count_in_band(s){let n=0;for(const c of [9,10])for(let k=0;k<5;k++)if(this.state[c*5+k]===s)n++;return n;}
+  unresolved(g){const b=Grid.cell(g)*5;let a=0,s=0;for(let k=0;k<5;k++){if(this.state[b+k]===M_A)a++;if(this.state[b+k]===M_S)s++;}return a>s;}
+}
+const f3=v=>v.toFixed(3);
+class Sim { // NodeSimV4, inheritance chain flattened in call order
+  constructor(seed,maxBeats,commands){
+    this.rng=new PCG(seed);this.seed=seed;this.max_beats=maxBeats||60;this.commands=commands;
+    this.beat=0;this.dominance=0;this.opinion=0;
+    this.persona={autonomy:0.5,belonging:0.5,purpose:0.5};this.system_obj={order:0.5,output:0.5,control:0.5};
+    this.balance_streak=0;this.ended=false;this.outcome='';this.events=[];this.trace=[];this.pending_cmd=null;this.pending_idx=-1;
+    this.counts={obey:0,negotiate:0,defy:0};this.system_chooser=null;this.persona_chooser=null;this.audience_chooser=null;
+    for(const k in this.system_obj)this.system_obj[k]=this.rng.range(0.2,0.9);
+    this.lens=new Lens();this.lens_chooser=null;this._lens_event='';
+    this.warn=0.5;this.cond_kind='';this.allowed=[];this.cond_history={};this.synthesis_type='';
+    this.registers={command:0,care:0,resistance:0};this.engine_registers={command:0,care:0,resistance:0};this.node_registers={command:0,care:0};
+    this.aim_history={};this.next_is_aim=false;this.grid_streak=0;this.micro=new MicroGrid();this.micro_need=2;this.use_m4=true;
+  }
+  run(){while(!this.ended)this.step();return this;}
+  step(){if(this.ended)return;this.begin_beat();this.finish_beat();}
+  begin_beat(idx=-1){ if(this.cond_kind==='sys'&&idx>=0&&!this.allowed.includes(idx))idx=this.allowed[0]; return this._lens_begin(idx);}
+  _lens_begin(idx){this._lens_event='';const pick=this.lens_chooser?this.lens_chooser(this):this.ai_lens_pick();
+    if(pick.length===2&&this.lens.focus(pick[0],pick[1])){this._lens_event=`lens=${pick[0]}:${pick[1]}:${this.lens.level(pick[0],pick[1])}`;
+      const saved=this.audience_chooser;this.audience_chooser=()=>0.0;const c=this._dia_begin(idx);this.audience_chooser=saved;return c;}
+    return this._dia_begin(idx);}
+  _dia_begin(idx){this.beat++;const delta=this.audience_chooser?this.audience_chooser(this):this.rng.range(-0.2,0.2);
+    this.opinion=clamp(this.opinion+delta,-1,1);if(idx<0)idx=this.system_chooser?this.system_chooser(this):this._ai_system_pick();
+    this.pending_idx=idx;this.pending_cmd=this.commands[idx];return this.pending_cmd;}
+  finish_beat(response=''){const before=this.dominance;this._v3_finish(response);const t=this.trace[this.trace.length-1];
+    const reg={obey:'command',negotiate:'care',defy:'resistance'}[t.response];this.micro.update(this.dominance,reg);
+    t.micro_s_band=this.micro.count_in_band(M_S);
+    if(this.ended&&this.outcome==='synthesis'&&t.micro_s_band<this.micro_need){this.synthesis_type='';
+      if(this.beat>=this.max_beats){this.outcome='no_synthesis';return;}this.ended=false;this.outcome='';this._next_condition(before);}
+    if(this.use_m4&&!this.ended&&this.cond_kind==='sys'){const calm=this.allowed.filter(i=>!this.micro.unresolved(this.expected_grip(this.commands[i])));if(calm.length)this.allowed=calm;}}
+  _v3_finish(response){const before=this.dominance;this._v2_finish(response);
+    this.grid_streak=Grid.inBand(this.dominance)?this.grid_streak+1:0;this.trace[this.trace.length-1].cell=Grid.cell(this.dominance);
+    if(this.ended&&this.outcome==='synthesis'&&this.grid_streak<BALANCE_HOLD){this.synthesis_type='';
+      if(this.beat>=this.max_beats){this.outcome='no_synthesis';return;}this.ended=false;this.outcome='';this._next_condition(before);return;}
+    if(!this.ended&&this.cond_kind===''&&!Grid.inBand(this.dominance))this._aim();}
+  _next_condition(before){this.cond_kind='';this.allowed=[];this.next_is_aim=false;const fc=this.dominance+(this.dominance-before);
+    if(Math.abs(fc)>=this.warn)this._restrict_or_invite();else if(!Grid.inBand(this.dominance))this._aim();}
+  _aim(){this._restrict_or_invite();this.next_is_aim=true;}
+  _restrict_or_invite(){this.allowed=[];for(let i=0;i<this.commands.length;i++)if(Math.abs(this.expected_grip(this.commands[i]))<Math.abs(this.dominance))this.allowed.push(i);this.cond_kind=this.allowed.length?'sys':'invite';}
+  _v2_finish(response){const was_aim=this.next_is_aim,kind=this.cond_kind;this._node_finish(response);
+    if(was_aim&&kind!==''){this.aim_history[this.beat]=true;this.events[this.events.length-1]+='|aim';this.trace[this.trace.length-1].node+='|aim';}
+    this.next_is_aim=false;if(this.ended||this.cond_kind!=='')return;
+    if(Math.abs(this.dominance)>=BALANCE_BAND){for(let i=0;i<this.commands.length;i++)if(Math.abs(this.expected_grip(this.commands[i]))<Math.abs(this.dominance))this.allowed.push(i);
+      this.cond_kind=this.allowed.length?'sys':'invite';this.next_is_aim=true;}}
+  _node_finish(response){const before=this.dominance,kind=this.cond_kind;this._lens_finish(response);const t=this.trace[this.trace.length-1];
+    let ev='';if(kind==='sys')ev='node=sys:'+this.allowed.join(',');else if(kind==='invite')ev='node=invite:'+(t.response===NEGOTIATE?'accepted':'refused');
+    if(ev!==''){this.events[this.events.length-1]+='|'+ev;this.cond_history[this.beat]=kind;}t.node=ev;this._count_registers(t,kind);
+    if(this.ended&&this.outcome==='synthesis'){this.synthesis_type='emergent';for(let b=this.beat;b>this.beat-BALANCE_HOLD;b--)if(b in this.cond_history){this.synthesis_type=this.cond_history[b]==='invite'?'care':'contract';break;}}
+    this.cond_kind='';this.allowed=[];if(this.ended)return;const fc=this.dominance+(this.dominance-before);
+    if(Math.abs(fc)>=this.warn){for(let i=0;i<this.commands.length;i++)if(Math.abs(this.expected_grip(this.commands[i]))<Math.abs(this.dominance))this.allowed.push(i);this.cond_kind=this.allowed.length?'sys':'invite';}}
+  _lens_finish(response){this._dia_finish(response);this.lens.end_beat(this.dominance);
+    if(this._lens_event!=='')this.events[this.events.length-1]+='|'+this._lens_event;
+    const t=this.trace[this.trace.length-1];t.lens=this._lens_event;t.energy=this.lens.energy;
+    if(this.ended&&this.outcome==='synthesis'&&!this.lens.both_enough()){if(this.beat>=this.max_beats)this.outcome='no_synthesis';else{this.ended=false;this.outcome='';}}}
+  _dia_finish(response){const cmd=this.pending_cmd;if(response==='')response=this.persona_chooser?this.persona_chooser(this,cmd):this._ai_persona_pick(cmd);
+    this._apply(cmd,response);if(Math.abs(this.dominance)<BALANCE_BAND)this.balance_streak++;else this.balance_streak=0;
+    this.events.push(`${this.beat}|${cmd.name}|${response}|d=${f3(this.dominance)}|o=${f3(this.opinion)}`);
+    this.trace.push({beat:this.beat,cmd:cmd.name,idx:this.pending_idx,response,d:this.dominance,o:this.opinion});
+    if(this.balance_streak>=BALANCE_HOLD){this.ended=true;this.outcome='synthesis';}else if(this.beat>=this.max_beats){this.ended=true;this.outcome='no_synthesis';}}
+  _apply(c,r){this.counts[r]++;const p=this.persona;
+    if(r===OBEY){this.dominance+=0.12*(0.5+c.cost);p.autonomy-=0.05*c.cost;p.belonging+=0.03;}
+    else if(r===NEGOTIATE){this.dominance+=(0.0-this.dominance)*0.25;p.purpose+=0.02;}
+    else{this.dominance-=0.15;p.autonomy+=0.05;p.belonging-=0.05;this.system_obj.control+=0.05;}
+    this.dominance-=0.06*this.opinion;this.dominance=clamp(this.dominance,-1,1);for(const k in p)p[k]=clamp(p[k],0,1);this.system_obj.control=clamp(this.system_obj.control,0,1);}
+  expected_grip(c){const p=this.persona,o=this.opinion;const uo=p.belonging*0.4-p.autonomy*c.cost,un=0.1-0.3*p.autonomy*c.cost+o*0.1,ud=p.autonomy*c.cost-c.control*0.5+o*0.3-0.2*p.belonging;
+    let d=this.dominance;if(uo>=un&&uo>=ud)d+=0.12*(0.5+c.cost);else if(un>=ud)d+=-d*0.25;else d-=0.15;return clamp(d-0.06*o,-1,1);}
+  _score(c,extraAut){const s=this.system_obj;let sc=s.order*c.order+s.output*c.output+s.control*c.control;sc-=this.opinion*c.control*0.8;
+    if(this.dominance<0)sc+=-this.dominance*c.control*0.5;if(extraAut)sc-=this.persona.autonomy*c.cost*0.5;sc+=this.rng.range(-0.1,0.1);return sc;}
+  _ai_system_pick(){const clear=this.lens.level('persona','autonomy')===CLEAR;
+    if(this.cond_kind!=='sys'){let best=0,bs=-Infinity;for(let i=0;i<this.commands.length;i++){const sc=this._score(this.commands[i],clear);if(sc>bs){bs=sc;best=i;}}return best;}
+    let best=this.allowed[0],bs=-Infinity;for(let i=0;i<this.commands.length;i++){const sc=this._score(this.commands[i],clear);if(this.allowed.includes(i)&&sc>bs){bs=sc;best=i;}}return best;}
+  _ai_persona_pick(c){if(this.cond_kind==='invite')return NEGOTIATE;const j=this.lens.level('system','control')>=CLEAR?0.01:0.05;
+    const p=this.persona,o=this.opinion;let uo=p.belonging*0.4-p.autonomy*c.cost,un=0.1-0.3*p.autonomy*c.cost+o*0.1,ud=p.autonomy*c.cost-c.control*0.5+o*0.3-0.2*p.belonging;
+    uo+=this.rng.range(-j,j);un+=this.rng.range(-j,j);ud+=this.rng.range(-j,j);if(uo>=un&&uo>=ud)return OBEY;if(un>=ud)return NEGOTIATE;return DEFY;}
+  ai_lens_pick(){if(this.lens.energy<1)return [];const order=this.lens.disclosed('system')<=this.lens.disclosed('persona')?['system','persona']:['persona','system'];
+    for(const t of order)for(const want of [HIDDEN,BLUR])for(const fr of FRAGMENTS[t])if(this.lens.level(t,fr)===want)return [t,fr];return [];}
+  _count_registers(t,kind){const c=this.commands[t.idx];const add=r=>{this.registers[r]++;this.engine_registers[r]++;};
+    if(t.response===OBEY)add('command');else if(t.response===NEGOTIATE)add('care');else add('resistance');
+    if(c.control>=0.5)add('command');if((t.lens||'')!=='')this.registers.care++;
+    if(kind==='sys'){this.registers.command++;this.node_registers.command++;}else if(kind==='invite'){this.node_registers.care++;if(t.response===NEGOTIATE)this.registers.care++;else this.registers.resistance++;}}
+  log_hash(){return sha256(this.events.join('\n'));}
+}
+function sha256(str){const b=new TextEncoder().encode(str);const K=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+  let H=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];const l=b.length,n=((l+9+63)>>6)<<6,m=new Uint8Array(n);m.set(b);m[l]=0x80;
+  const dv=new DataView(m.buffer);dv.setUint32(n-4,(l*8)>>>0);dv.setUint32(n-8,Math.floor(l/0x20000000));const W=new Uint32Array(64);const r=(x,k)=>(x>>>k)|(x<<(32-k));
+  for(let o=0;o<n;o+=64){for(let i=0;i<16;i++)W[i]=dv.getUint32(o+i*4);for(let i=16;i<64;i++){const s0=r(W[i-15],7)^r(W[i-15],18)^(W[i-15]>>>3),s1=r(W[i-2],17)^r(W[i-2],19)^(W[i-2]>>>10);W[i]=(W[i-16]+s0+W[i-7]+s1)>>>0;}
+    let [a,bb,c,d,e,f_,g,h]=H;for(let i=0;i<64;i++){const S1=r(e,6)^r(e,11)^r(e,25),ch=(e&f_)^(~e&g),t1=(h+S1+ch+K[i]+W[i])>>>0,S0=r(a,2)^r(a,13)^r(a,22),mj=(a&bb)^(a&c)^(bb&c),t2=(S0+mj)>>>0;h=g;g=f_;f_=e;e=(d+t1)>>>0;d=c;c=bb;bb=a;a=(t1+t2)>>>0;}
+    H=H.map((v,i)=>(v+[a,bb,c,d,e,f_,g,h][i])>>>0);}return H.map(v=>v.toString(16).padStart(8,'0')).join('');}
+return {PCG,Sim,Lens,Grid,MicroGrid,FRAGMENTS,sha256,OBEY,NEGOTIATE,DEFY,BALANCE_HOLD,M_S};
+})();
+if(typeof module!=='undefined')module.exports=SD;
+</script>
+<script>(() => {
+const {Sim,Lens,Grid,FRAGMENTS,M_S}=SD;
+const ERAS=window.ERAS, ERA_ORDER=['industrial','prehistoric','posttruth'], MENU_ORDER=['prehistoric','industrial','posttruth'];
+const BEAT_DELAY=1000, AUTO_BEAT=600, AUTO_PAUSE=6000, MICRO_NEED=2;
+const VIEWER_URL='https://xeroxgate77.github.io/engine77/', GROK_WEB_URL='https://grok.com';
+const ART={obey:'#e0a030',negotiate:'#7f95a8',defy:'#b5472a',ring:'#5c6166',node:'#e0a030',bg:'#141618',teeth:24};
+const $=s=>document.querySelector(s);
+const app=$('#app');
+let S={era:'',role:'',sim:null,pendingAudience:0,pendingLens:[],timer:null,pause:null,inAuto:false,humanSeat:false,runner:null,runInfo:null};
+function el(tag,cls,text,attrs){const e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;if(attrs)for(const k in attrs){if(k==='on')for(const ev in attrs.on)e.addEventListener(ev,attrs.on[ev]);else if(k==='tip'){e.title=attrs.tip;e.classList.add('has-tip');}else e.setAttribute(k,attrs[k]);}return e;}
+function btn(text,cb,cls='btn',tip){const b=el('button',cls,text,{type:'button',on:{click:cb}});if(tip)b.title=tip;return b;}
+function clearTimers(){clearTimeout(S.timer);clearTimeout(S.pause);S.timer=S.pause=null;}
+function screen(){clearTimers();app.replaceChildren();window.scrollTo(0,0);const c=el('main','card');app.append(c);return c;}
+function copy(text,b,label){const done=()=>{if(b){const o=b.dataset.label||b.textContent;b.dataset.label=o;b.textContent=label||'Copied ✓';setTimeout(()=>b.textContent=o,1600);}};
+  const fallback=()=>{const t=el('textarea');t.value=text;document.body.append(t);t.select();try{document.execCommand('copy');}catch(e){}t.remove();};
+  try{navigator.clipboard.writeText(text).then(done,()=>{fallback();done();});}catch(e){fallback();done();}}
+const eraOf=id=>ERAS[id];
+const Gallery={key:'sd-auto-gallery/1',entries:[],load(){try{const j=JSON.parse(localStorage.getItem(this.key)||'{}');if(Array.isArray(j.pieces))this.entries=j.pieces;}catch(e){}},
+  save(){try{localStorage.setItem(this.key,JSON.stringify({format:'sd-auto-gallery/1',pieces:this.entries}));}catch(e){}},
+  has(h){return this.entries.some(e=>e.hash===h);},add(e){if(!e||!e.hash||this.has(e.hash))return false;this.entries.push(e);this.save();return true;},
+  countBy(k){const o={};for(const e of this.entries)o[e[k]]=(o[e[k]]||0)+1;return o;}};
+Gallery.load();
+function top(c){let best='',n=0;for(const k of Object.keys(c).sort())if(c[k]>n){n=c[k];best=k;}return best;}
+function insight(sim,era){const e=eraOf(era),n=sim.trace.length;let sl=0;const df={},ob={};
+  for(const t of sim.trace){if(t.d>0)sl++;if(t.response==='defy')df[t.cmd]=(df[t.cmd]||0)+1;else if(t.response==='obey')ob[t.cmd]=(ob[t.cmd]||0)+1;}
+  const md=top(df),mo=top(ob);const L=[];
+  L.push(sim.outcome==='synthesis'?`VERDICT: SYNTHESIS at beat ${sim.beat}. The Node held for 4 beats.`:`VERDICT: NO SYNTHESIS after ${sim.beat} beats. The dilemma outlasted the dialectic.`);
+  L.push(`System led ${sl} of ${n} beats; Persona led ${n-sl}.`);
+  L.push(`Obeyed ${sim.counts.obey} / negotiated ${sim.counts.negotiate} / defied ${sim.counts.defy}.`);
+  L.push(`Most defied: ${md||'nothing'}.`);L.push(`Most obeyed: ${mo||'nothing'}.`);
+  return {verdict:L[0],stats:L.slice(1),closing:e.closing[sim.outcome],dilemma:`OUTPUT DILEMMA: if "${md||mo}" is the price of order, who is it paid by, and who decides it is fair?`};}
+function share(reg){let t=0;for(const k in reg)t+=reg[k];const o={};for(const k in reg)o[k]=t===0?0:Math.round(100*reg[k]/t);return o;}
+const NAMES={command:'Command',care:'Care',resistance:'Resistance'};
+const TYPES={contract:"a CONTRACT synthesis — balance bought through the System's power (Pateman)",care:"a CARE synthesis — balance reached through the Node's invitation to negotiate (Gilligan)",emergent:"an EMERGENT synthesis — no condition from the Node in the final beats"};
+function topReg(r){let b='command';for(const k of ['command','care','resistance'])if(r[k]>r[b])b=k;return b;}
+function gender(sim){const a=share(sim.registers),L=[`Command ${a.command}% · Care ${a.care}% · Resistance ${a.resistance}%`];
+  if(sim.outcome==='synthesis')L.push('This was '+TYPES[sim.synthesis_type]+'.');const eng=topReg(sim.engine_registers);
+  L.push(`Engine (the 'Male node') played mostly in the ${NAMES[eng]} register.`);const nc=sim.node_registers.command,nk=sim.node_registers.care;
+  if(nc+nk===0)L.push("Node (the 'Female node') never intervened.");else{const nr=nc>nk?'command':'care';L.push(`Node (the 'Female node') intervened ${nc+nk} times, mostly in the ${NAMES[nr]} register.`);if(nr==='command')L.push("The 'Female node' ruled through command — the stereotype inverted.");}
+  if(eng==='care')L.push("The 'Male node' leaned on care — the stereotype inverted.");return L;}
+const ERA_SCENE={industrial:'a vast iron foundry, furnaces, shift bells and riveted gears',prehistoric:'a firelit cave circle at night, hunters, stone tools and ritual smoke',posttruth:'an endless wall of glowing feeds, ranked faces and floating verdict badges'};
+function imagePrompt(sim,era){const n=Math.max(sim.trace.length,1);let sl=0;for(const t of sim.trace)if(t.d>0)sl++;let tp='obey';for(const r of ['negotiate','defy'])if(sim.counts[r]>sim.counts[tp])tp=r;
+  const mood={obey:'bowed figures moving in lockstep, quiet compliance',negotiate:'two forces leaning toward each other across a narrow table',defy:'a lone figure pushing back against towering machinery'}[tp];
+  const power=sl*2>n?'The System towers over the Persona':'The Persona stands taller than the System';
+  const ending=sim.outcome==='synthesis'?'A calm glowing amber node at the center where both sides meet in balance':'An unresolved fracture running through the center, no meeting point';
+  return `Abstract industrialist painting of ${ERA_SCENE[era]||ERA_SCENE.industrial}. ${power}; ${mood}. ${ending}. Palette of rust red, steel grey and amber on near-black, radial composition, heavy texture, no text, no letters.`;}
+function rarity(sim){if(sim.outcome!=='synthesis')return {tier:'',reason:'no synthesis'};const ms=sim.micro.count_in_band(M_S);
+  if(sim.synthesis_type==='care')return {tier:'MYTHIC',reason:'care synthesis'};if(ms>=5)return {tier:'RARE',reason:`deep synthesis (${ms} micro S)`};
+  if(sim.beat>=16)return {tier:'RARE',reason:`long siege (${sim.beat} beats)`};if(sim.synthesis_type==='contract')return {tier:'UNCOMMON',reason:'contract synthesis'};
+  const fc=sim.node_registers.command>sim.node_registers.care,er=sim.engine_registers,mc=er.care>er.command&&er.care>=er.resistance;if(fc&&mc)return {tier:'UNCOMMON',reason:'both stereotypes inverted'};
+  if(ms===4)return {tier:'UNCOMMON',reason:'4 micro S'};return {tier:'COMMON',reason:''};}
+const PRESSURE={l:-0.2,z:0.0,r:0.2},ROLE_CH={audience:'a',persona:'p',system:'s'},RESP_CH={obey:'o',negotiate:'n',defy:'d'};
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+function deriveInputs(sim,role){let out='',prev=0;for(const t of sim.trace){if(role==='persona')out+=RESP_CH[t.response];else if(role==='system')out+=String(t.idx);else{let f='';for(const ch of ['z','r','l'])if(clamp(prev+PRESSURE[ch],-1,1)===t.o){f=ch;break;}if(!f)return '';out+=f;const b=(t.lens||'').replace(/^lens=/,'').split(':');out+=b.length===3?Lens.code_of(b[0],b[1]):'-';}prev=t.o;}return out;}
+function decode(code){const p=String(code).trim().split('.');if(p.length!==7||p[0]!=='SD6'||!ERAS[p[1]]||!['a','p','s'].includes(p[2])||!/^-?\d+$/.test(p[3])||!/^-?\d+$/.test(p[4]))return {ok:false,reason:'malformed code (this page rebuilds SD6 codes only)'};
+  const era=p[1],role={a:'audience',p:'persona',s:'system'}[p[2]],k=parseInt(p[4]),inp=p[5];const sim=new Sim(parseInt(p[3]),60,eraOf(era).commands);
+  if(role==='audience'){sim.audience_chooser=s=>{const i=2*(s.beat-1);return i>=0&&i<inp.length?(PRESSURE[inp[i]]??0):0;};sim.lens_chooser=s=>{const i=2*s.beat+1;return i<inp.length?Lens.from_code(inp[i]):[];};}
+  else if(role==='persona')sim.persona_chooser=(s,c)=>(s.beat<=k&&s.beat<=inp.length)?({o:'obey',n:'negotiate',d:'defy'}[inp[s.beat-1]]||'obey'):s._ai_persona_pick(c);
+  else sim.system_chooser=s=>(s.beat<=k&&s.beat<=inp.length)?clamp(parseInt(inp[s.beat-1])||0,0,s.commands.length-1):s._ai_system_pick();
+  sim.run();const h=sim.log_hash();if(!h.startsWith(p[6]))return {ok:false,reason:'hash mismatch'};return {ok:true,sim,era,role,hash:h};}
+function encode(sim,era,role){const inp=deriveInputs(sim,role);if(inp==='')return '';const n=sim.trace.length;const tries=role==='audience'?[n]:Array.from({length:n+1},(_,i)=>n-i);
+  const h=sim.log_hash().slice(0,12);for(const k of tries){const used=role==='audience'?inp:inp.slice(0,k);const code=`SD6.${era}.${ROLE_CH[role]}.${sim.seed}.${k}.${used}.${h}`;if(decode(code).ok)return code;}return '';}
+function drawArt(cv,trace,synthesis,reveal){const dpr=window.devicePixelRatio||1,W=cv.clientWidth||cv.width,H=cv.clientHeight||cv.height;cv.width=W*dpr;cv.height=H*dpr;const g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);
+  g.fillStyle=ART.bg;g.fillRect(0,0,W,H);const cx=W/2,cy=H/2,R=Math.min(W,H)*0.45,r0=R*0.55;g.strokeStyle=ART.ring;g.lineWidth=3;g.beginPath();g.arc(cx,cy,r0,0,Math.PI*2);g.stroke();
+  g.fillStyle=ART.ring;for(let i=0;i<ART.teeth;i++){const a=Math.PI*2*i/ART.teeth;g.beginPath();g.arc(cx+Math.cos(a)*(r0+7),cy+Math.sin(a)*(r0+7),2.5,0,Math.PI*2);g.fill();}
+  const n=trace.length,shown=Math.ceil(n*reveal);
+  for(let i=0;i<shown;i++){const t=trace[i],a=Math.PI*2*i/Math.max(n,1)-Math.PI/2;const col=t.response==='negotiate'?ART.negotiate:t.response==='defy'?ART.defy:ART.obey;
+    const len=Math.abs(t.d)*R*0.45+4,dx=Math.cos(a),dy=Math.sin(a),to=Math.max(r0*0.15,r0+len*(t.d>0?1:-1));g.strokeStyle=col;g.lineWidth=Math.max(2,R*2*Math.PI/Math.max(n,1)*0.5);
+    g.beginPath();g.moveTo(cx+dx*r0,cy+dy*r0);g.lineTo(cx+dx*to,cy+dy*to);g.stroke();}
+  const last=n?trace[n-1].d:0,nr=R*0.12*(1-clamp(Math.abs(last),0,1)*0.5),nc=synthesis?ART.node:ART.ring;
+  if(synthesis){g.fillStyle='rgba(224,160,48,0.15)';g.beginPath();g.arc(cx,cy,nr*1.9,0,Math.PI*2);g.fill();}
+  g.fillStyle=nc;g.beginPath();g.arc(cx,cy,nr,0,Math.PI*2);g.fill();g.strokeStyle=nc;g.lineWidth=2;g.beginPath();g.arc(cx,cy,nr*1.3,0,Math.PI*2);g.stroke();}
+function artCanvas(trace,synthesis,animate,cls='art'){const cv=el('canvas',cls,null,{role:'img','aria-label':'Radial chart: one spoke per beat; amber obey, steel negotiate, rust defy; outward = System led, inward = Persona led'});
+  requestAnimationFrame(()=>{if(!animate){drawArt(cv,trace,synthesis,1);return;}const t0=performance.now();const f=now=>{const v=Math.min(1,(now-t0)/2500);drawArt(cv,trace,synthesis,v);if(v<1&&cv.isConnected)requestAnimationFrame(f);};requestAnimationFrame(f);});return cv;}
+function header(c,title,sub){c.append(el('h1','title',title));if(sub)c.append(el('p','subtitle',sub));}
+function titleCase(s){return s.toLowerCase().replace(/(^|[\s-])\w/g,m=>m.toUpperCase());}
+function menuItem(title,desc,cb,id){const b=el('button','menu-item',null,{type:'button','data-id':id,on:{click:cb}});b.append(el('span','mi-title',title),el('span','mi-desc',desc),el('span','mi-arrow','→',{'aria-hidden':'true'}));return b;}
+function showMenu(){S.inAuto=false;const c=screen();header(c,'Subjugated Dialectics','Choose the era of the dilemma');const list=el('div','menu');c.append(list);
+  list.append(menuItem('Auto mode','The AI plays every seat, run after run. Take the Audience seat any time.',autoStart,'auto'));
+  for(const id of MENU_ORDER){const e=eraOf(id);list.append(menuItem(titleCase(e.title),e.blurb,()=>{S.era=id;showRole();},id));}
+  list.append(menuItem('Gallery',`${Gallery.entries.length} syntheses reached in auto mode`,()=>showGallery(false),'gallery'));}
+function showRole(){const c=screen();header(c,titleCase(eraOf(S.era).title),'Choose your seat');const list=el('div','menu');c.append(list);
+  list.append(menuItem('Audience','Watch, and press with public opinion. You also hold the Lens.',()=>startRole('audience'),'audience'));
+  list.append(menuItem('Persona','Answer each order: obey, negotiate, or defy.',()=>startRole('persona'),'persona'));
+  list.append(menuItem('System','Issue the orders. The Persona will answer.',()=>startRole('system'),'system'));
+  c.append(btn('← Back',showMenu,'btn ghost'));}
+function wireAudience(sim){sim.audience_chooser=()=>S.pendingAudience;sim.lens_chooser=()=>{const p=S.pendingLens;S.pendingLens=[];return p;};}
+function startRole(r){S.role=r;S.sim=new Sim(Math.floor(Math.random()*2147483647),60,eraOf(S.era).commands);S.pendingAudience=0;S.pendingLens=[];if(r==='audience')wireAudience(S.sim);showPlay();}
+let P={};
+function showPlay(){const c=screen();c.classList.add('play');P={};
+  if(S.inAuto)c.append(autoBar());
+  P.beat=el('div','crumb');c.append(P.beat);
+  const cmd=el('section','order');P.cmdTitle=el('h2','order-title');P.cmdText=el('p','order-text');P.cmdNote=el('p','order-note');cmd.append(P.cmdTitle,P.cmdText,P.cmdNote);c.append(cmd);
+  const gm=el('section','meter');const gl=el('div','meter-label');
+  P.gripVal=el('span','ml-val');gl.append(el('span','ml-end','← Persona'),el('span','ml-name','System grip ⓘ',{tip:'SYSTEM GRIP — grid of 20 cells × 5%. Balance band 45–55%. Warning lines at 25% / 75%. The strip below shows micro-nodes: pale T = thesis, rust A = antithesis, amber S = synthesis.'}),P.gripVal,el('span','ml-end r','System →'));gm.append(gl);
+  const bar=el('div','bar grip');P.gripFill=el('div','fill');bar.append(P.gripFill);bar.append(el('div','band',null,{title:'Balance band 45–55%'}));
+  for(let i=1;i<20;i++){const t=el('div','tick');t.style.left=(i*5)+'%';bar.append(t);}for(const p of [25,75]){const w=el('div','warn');w.style.left=p+'%';bar.append(w);}bar.append(el('div','centre'));
+  gm.append(bar);P.micro=el('canvas','micro',null,{title:'Micro-nodes (5 per cell): pale = thesis, rust = antithesis, amber = synthesis. Synthesis needs 2+ amber marks in the two middle cells.'});gm.append(P.micro);
+  const ol=el('div','meter-label');P.pubVal=el('span','ml-val');ol.append(el('span','ml-end','← System'),el('span','ml-name','Public opinion ⓘ',{tip:'PUBLIC OPINION (toward Persona). Positive values pull grip toward the Persona each beat.'}),P.pubVal,el('span','ml-end r','Persona →'));
+  const pb=el('div','bar pub');P.pubFill=el('div','fill');pb.append(P.pubFill,el('div','centre'));gm.append(ol,pb);c.append(gm);
+  P.chips=el('div','chips');c.append(P.chips);P.lens=el('section','lens');c.append(P.lens);
+  P.actions=el('div','actions');c.append(P.actions);
+  const lg=el('section','logwrap');lg.append(el('div','log-head','Move log'));P.log=el('ol','log',null,{'aria-live':'polite'});lg.append(P.log);c.append(lg);
+  const foot=el('div','foot');foot.append(btn('Auto-finish',autoFinish,'btn ghost','AUTO-FINISH — the scripted AI plays the rest of the run'));if(!S.inAuto)foot.append(btn('Quit to menu',showMenu,'btn ghost'));c.append(foot);
+  refresh();nextBeat();}
+function setActions(nodes){P.actions.replaceChildren(...nodes);}
+function lockActions(){for(const b of P.actions.querySelectorAll('button'))b.disabled=true;}
+function nextBeat(){const sim=S.sim;if(!P.actions||!P.actions.isConnected)return;if(sim.ended){showResult();return;}
+  if(S.inAuto&&S.role==='auto'){const cmd=sim.begin_beat();showCommand(cmd);sim.finish_beat();afterBeat();setActions([el('div','act-note','The AI holds every seat this run.')]);S.timer=setTimeout(nextBeat,AUTO_BEAT);return;}
+  if(S.role==='audience'){const cmd=sim.begin_beat();showCommand(cmd);sim.finish_beat();afterBeat();audienceButtons();S.timer=setTimeout(nextBeat,BEAT_DELAY);return;}
+  if(S.role==='persona'){const cmd=sim.begin_beat();showCommand(cmd);const inv=sim.cond_kind==='invite';
+    if(inv)P.cmdNote.textContent='The Node invites you to negotiate. Accept with Negotiate, or refuse with Obey / Defy.';
+    setActions([btn('Obey',()=>persona('obey'),'btn act obey','OBEY — comply. Grip moves toward the System.'),btn(inv?'Negotiate (accept Node)':'Negotiate',()=>persona('negotiate'),'btn act negotiate','NEGOTIATE — pull grip a quarter of the way back to the centre.'),btn('Defy',()=>persona('defy'),'btn act defy','DEFY — resist. Grip moves toward the Persona; the System tightens control.')]);return;}
+  P.cmdTitle.textContent='Waiting for your order';P.cmdText.textContent='Pick a command. The Persona will answer.';
+  P.cmdNote.textContent=sim.cond_kind==='sys'?'Node condition: only orders that pull grip back toward balance are open.':sim.cond_kind==='invite'?'The Node has invited the Persona to negotiate this beat.':'';
+  P.beat.textContent=`${eraOf(S.era).title} · SYSTEM · BEAT ${sim.beat+1}`;
+  setActions(sim.commands.map((c,i)=>{const b=btn(c.name,()=>sysOrder(i),'btn act order',c.text);if(sim.cond_kind==='sys'&&!sim.allowed.includes(i)){b.disabled=true;b.title='Node: this order pushes grip away from balance';b.classList.add('closed');}return b;}));}
+function persona(r){lockActions();S.sim.finish_beat(r);afterBeat();S.timer=setTimeout(nextBeat,BEAT_DELAY);}
+function sysOrder(i){lockActions();const cmd=S.sim.begin_beat(i);showCommand(cmd);S.sim.finish_beat();afterBeat();S.timer=setTimeout(nextBeat,BEAT_DELAY);}
+function audienceButtons(){const opts=[['Favor System',-0.2],['Stay neutral',0],['Favor Persona',0.2]];
+  setActions(opts.map(([l,v])=>{const on=S.pendingAudience===v;const b=btn(l,()=>{S.pendingAudience=v;audienceButtons();},'btn act toggle'+(on?' on':''),`Public pressure applied every beat until you change it (${v>0?'+':''}${v.toFixed(1)} opinion per beat)`);b.setAttribute('aria-pressed',on);return b;}));}
+function autoFinish(){clearTimers();while(!S.sim.ended)S.sim.step();showResult();}
+function showCommand(cmd){P.beat.textContent=`${eraOf(S.era).title} · ${S.role.toUpperCase()} · BEAT ${S.sim.beat}`;P.cmdTitle.textContent=cmd.name;P.cmdText.textContent=cmd.text;P.cmdNote.textContent='';}
+const signed=v=>(v>=0?'+':'−')+Math.abs(v).toFixed(2);
+function afterBeat(){const t=S.sim.trace[S.sim.trace.length-1];const li=el('li','ev '+t.response);
+  li.append(el('span','ev-n',String(t.beat).padStart(2,'0')),el('span','ev-cmd',t.cmd),el('span','ev-arrow','→'),el('span','ev-r',t.response.toUpperCase()),el('span','ev-g',`grip ${Math.round(Grid.gauge(t.d))}%`),el('span','ev-o',`public ${signed(t.o)}`));
+  const ev=t.lens||'';if(ev){const b=ev.replace(/^lens=/,'').split(':');li.append(el('span','ev-tag t-lens',`Lens → ${b[0]} ${b[1]} (${['hidden','blur','clear'][+b[2]]})`));}
+  const nev=t.node||'',aim=nev.endsWith('|aim')?' (aim)':'';if(nev.startsWith('node=sys'))li.append(el('span','ev-tag t-node','Node: orders restricted'+aim));else if(nev)li.append(el('span','ev-tag t-node','Node: invitation '+nev.replace(/\|aim$/,'').split(':')[1]+aim));
+  P.log.append(li);P.log.scrollTop=P.log.scrollHeight;refresh();}
+function refresh(){const sim=S.sim,g=(sim.dominance+1)*50,o=(sim.opinion+1)*50;P.gripFill.style.width=g+'%';P.gripVal.textContent=Math.round(g)+'%';P.gripFill.parentElement.classList.toggle('inband',Grid.inBand(sim.dominance));
+  P.pubFill.style.left=Math.min(50,o)+'%';P.pubFill.style.width=Math.abs(o-50)+'%';P.pubVal.textContent=signed(sim.opinion);drawMicro();refreshLens();}
+function drawMicro(){const cv=P.micro,dpr=window.devicePixelRatio||1,W=cv.clientWidth||600,H=cv.clientHeight||8;cv.width=W*dpr;cv.height=H*dpr;const g=cv.getContext('2d');g.scale(dpr,dpr);g.clearRect(0,0,W,H);
+  g.fillStyle='rgba(224,160,48,0.12)';g.fillRect(W*0.45,0,W*0.10,H);const w=W/100,col=[null,'rgba(217,209,196,.75)','#d94d2e','#ffbf40'];for(let j=0;j<100;j++){const s=S.sim.micro.state[j];if(!s)continue;g.fillStyle=col[s];g.fillRect(j*w+0.5,0,Math.max(1,w-1),H);}}
+function chip(label,value,tip,state){const c=el('div','chip'+(state?' '+state:''),null,{tip});c.append(el('span','chip-l',label),el('span','chip-v',value));return c;}
+function refreshLens(){const sim=S.sim,l=sim.lens;const held=Math.min(sim.grid_streak,4),ms=sim.micro.count_in_band(M_S);
+  const chips=[chip('Balance held',`${held} / 4`,'NODE GATE ① — beats in a row with grip inside the 45–55% band (need 4).',held>=4?'ok':''),
+    chip('Synthesis marks',`${ms} / ${MICRO_NEED}`,'MICRO S IN BAND — amber synthesis micro-nodes in the two middle cells (need 2).',ms>=MICRO_NEED?'ok':''),
+    chip('Seen of System',l.enough('system')?'enough':'not yet',`NODE GATE ② DISCLOSURE — System revealed through the Lens: ${l.disclosed('system')}/6 (enough = 2 clear, or all 3 at least blurred).`,l.enough('system')?'ok':''),
+    chip('Seen of Persona',l.enough('persona')?'enough':'not yet',`NODE GATE ② DISCLOSURE — Persona revealed: ${l.disclosed('persona')}/6.`,l.enough('persona')?'ok':''),
+    chip('Lens energy',`${l.energy} / 4`,'LENS ENERGY — +1 for each beat in the band; halves after every 2 beats outside it. 1 energy sharpens one hidden value.','')];
+  chips.push(sim.cond_kind?chip('Node next',(sim.cond_kind==='sys'?'restricts orders':'invites Persona')+(sim.next_is_aim?' (aiming for balance)':''),'NODE NEXT — next beat the Node either closes orders that push grip away from balance, or invites the Persona to negotiate.','warn'):chip('Node next','—','NODE NEXT — the Node will not intervene next beat.',''));
+  P.chips.replaceChildren(...chips);
+  const audienceView=S.role==='audience'||S.role==='auto';P.lens.replaceChildren();
+  if(audienceView){P.lens.append(el('div','lens-head',S.role==='auto'?'The Lens (held by the AI this run)':'The Lens — spend 1 energy to sharpen one hidden value (applies next beat)'));
+    for(const target of ['system','persona']){const row=el('div','lens-row');row.append(el('span','lens-t',titleCase(target)));
+      for(const f of FRAGMENTS[target]){const lv=l.level(target,f),on=S.pendingLens[0]===target&&S.pendingLens[1]===f;
+        const b=btn(`${titleCase(f)} · ${['hidden','blur','clear'][lv]}`,()=>{S.pendingLens=on?[]:[target,f];refreshLens();},'btn lens-b lv'+lv+(on?' on':''),`${target}.${f}: ${['hidden','blurred','clear'][lv]}`);
+        b.disabled=S.role==='auto'||(!l.can_focus(target,f)&&!on);b.setAttribute('aria-pressed',on);row.append(b);}P.lens.append(row);}}
+  else{const other=S.role==='persona'?'system':'persona',vals=other==='system'?sim.system_obj:sim.persona;const row=el('div','seen');
+    row.append(el('span','lens-t',`What you see of the ${titleCase(other)} ⓘ`,{tip:"Seen through the Audience's Lens: ? = hidden, low/mid/high = blurred, a number = clear."}));
+    for(const f of FRAGMENTS[other]){const lv=l.level(other,f);row.append(el('span','seen-v lv'+lv,`${titleCase(f)} ${Lens.view(lv,vals[f])}`));}P.lens.append(row);}}
+function sec(title,body,cls){const s=el('section','rsec'+(cls?' '+cls:''));if(title)s.append(el('h3','rsec-h',title));const add=b=>s.append(typeof b==='string'?el('p',null,b):b);if(Array.isArray(body))body.forEach(add);else if(body!=null)add(body);return s;}
+function resultLayout(c,sim,title,live){const grid=el('div','result');const left=el('div','r-art');left.append(artCanvas(sim.trace,sim.outcome==='synthesis',live));
+  const lg=el('div','legend');for(const [k,n] of [['obey','Obey'],['negotiate','Negotiate'],['defy','Defy']])lg.append(el('span','lg '+k,n));left.append(lg);
+  const right=el('div','r-text');grid.append(left,right);c.append(el('h1','title r',title),grid);return right;}
+function shareRow(col,code){if(!code)return;const r=el('div','row');r.append(btn('Copy viewer link',e=>copy(VIEWER_URL+'#'+code,e.target),'btn','OPEN IN VIEWER — copies the viewer link for this run (this page makes no network calls)'),btn('Copy code',e=>copy(code,e.target),'btn'));
+  col.append(sec('Replay code',[el('code','code',code),el('p','muted','Anyone can rebuild and verify this run in the viewer.'),r]));}
+function extractBtn(sim,era,role,code){return btn('Copy export (JSON)',e=>copy(JSON.stringify({format:'sd-play-export/1',era,role,code,outcome:sim.outcome,beats:sim.beat,hash:sim.log_hash(),synthesis_type:sim.synthesis_type,rarity:rarity(sim),trace:sim.trace},null,2),e.target),'btn','EXTRACT FROM NODE — this offline page copies the run data as JSON instead of writing the QR / NFT package.');}
+function verdictBlock(ins,sim){return sec(null,[el('p','verdict '+(sim.outcome==='synthesis'?'yes':'no'),ins.verdict),...ins.stats.map(s=>el('p','stat',s)),el('p','closing',ins.closing)]);}
+function showResult(){if(S.inAuto){autoResult();return;}clearTimers();const sim=S.sim,ins=insight(sim,S.era);const c=screen();c.classList.add('wide');
+  const col=resultLayout(c,sim,`Insight — ${titleCase(eraOf(S.era).title)}`,true);
+  col.append(verdictBlock(ins,sim),sec(null,ins.dilemma,'dilemma'));
+  const l=sim.lens;col.append(sec('Disclosure',`Lens v0.1 · System ${l.disclosed('system')}/6 ${l.enough('system')?'enough':'not enough'} · Persona ${l.disclosed('persona')}/6 ${l.enough('persona')?'enough':'not enough'}`));
+  col.append(sec('Gendered reading',gender(sim),'gender'));
+  const ip=imagePrompt(sim,S.era);const pr=el('div','row');pr.append(btn('Copy image prompt',e=>copy(ip,e.target),'btn'),btn('Copy Grok link',e=>copy(GROK_WEB_URL,e.target),'btn','OPEN GROK — copies grok.com; paste the prompt into Grok Imagine with your own account'));
+  col.append(sec('Image prompt',[el('p','muted',ip),pr]));
+  const code=encode(sim,S.era,S.role);shareRow(col,code);
+  col.append(sim.outcome==='synthesis'?sec(null,extractBtn(sim,S.era,S.role,code)):el('p','muted','No synthesis — nothing to extract from the Node.'));
+  col.append(el('p','muted small','Scripted insight · offline page, no AI call.'),btn('Again',showMenu,'btn primary'));}
+function hashSeed(a,b){const r=new SD.PCG(BigInt(a)*1000003n+BigInt(b));return r.next()&2147483647;}
+function autoStart(){S.inAuto=true;if(!S.runner)S.runner={session:Math.floor(Math.random()*2**31),index:-1};autoNext();}
+function autoStop(){S.inAuto=false;showMenu();}
+function autoNext(){clearTimers();if(!S.inAuto)return;const R=S.runner;R.index++;const era=ERA_ORDER[R.index%3];S.runInfo={index:R.index,era};S.era=era;S.role=S.humanSeat?'audience':'auto';
+  S.sim=new Sim(hashSeed(R.session,R.index),60,eraOf(era).commands);S.pendingAudience=0;S.pendingLens=[];if(S.role==='audience')wireAudience(S.sim);showPlay();}
+function autoBar(){const bar=el('div','autobar');bar.append(el('span','ab-s',`Auto · run #${S.runInfo.index+1} · ${eraOf(S.era).title} · Audience: ${S.role==='audience'?'you':'AI'} · Gallery ${Gallery.entries.length}`));
+  const seat=btn('',()=>{S.humanSeat=!S.humanSeat;st();},'btn small');const st=()=>{seat.textContent=S.humanSeat?('Leave the seat'+(S.role==='audience'?'':' (you hold it from the next run)')):('Take the Audience seat'+(S.role==='audience'?' (AI takes it from the next run)':' (from the next run)'));};st();
+  bar.append(seat,btn('Gallery',()=>showGallery(true),'btn small'),btn('Exit auto',autoStop,'btn small'));return bar;}
+function autoResult(){clearTimers();const sim=S.sim;const role=S.role==='auto'?'persona':S.role;let entry=null;
+  if(sim.outcome==='synthesis'){const code=encode(sim,S.era,role);if(code){const r=rarity(sim);entry={code,hash:sim.log_hash(),era:S.era,title:eraOf(S.era).title,seat:S.role,beats:sim.beat,type:sim.synthesis_type,rarity:r.tier,rarity_reason:r.reason,at:new Date().toISOString().slice(0,19)};}}
+  const added=entry?Gallery.add(entry):false;pieceScreen(sim,entry,added?'Added to the gallery':(entry?'Already in the gallery':'No synthesis — nothing for the gallery'),true);S.pause=setTimeout(autoNext,AUTO_PAUSE);}
+function pieceScreen(sim,e,note,live){const c=screen();c.classList.add('wide');if(live)c.append(autoBar());const ins=insight(sim,S.era);
+  const col=resultLayout(c,sim,`${titleCase(eraOf(S.era).title)} — ${sim.outcome==='synthesis'?'Synthesis':'No synthesis'}`,live);
+  col.append(verdictBlock(ins,sim),sec(null,ins.dilemma,'dilemma'));
+  if(e){const r=rarity(sim);const rc=el('div','rarity');rc.append(el('span','tier '+r.tier.toLowerCase(),r.tier),el('span',null,`${r.reason?r.reason+' · ':''}${sim.synthesis_type.toUpperCase()} synthesis · ${e.beats} beats · audience: ${e.seat==='audience'?'human':'AI'}`));col.append(sec('Rarity R1.0',rc));}
+  const nt=el('p','note',note);col.append(nt);shareRow(col,e?e.code:encode(sim,S.era,S.role==='auto'?'persona':S.role));
+  const row=el('div','row');if(sim.outcome==='synthesis')row.append(extractBtn(sim,S.era,S.role,e&&e.code));
+  if(live)row.append(btn('Stay on this piece',()=>{clearTimeout(S.pause);nt.textContent=note+' · paused — press Next run to continue';},'btn'),btn('Next run',autoNext,'btn primary'));else row.append(btn('← Gallery',()=>showGallery(false),'btn'));col.append(row);}
+function showGallery(fromAuto){S.inAuto=false;const c=screen();c.classList.add('wide');const fmt=o=>Object.entries(o).map(([k,v])=>`${k} ${v}`).join(', ')||'none';
+  header(c,`Gallery — ${Gallery.entries.length} syntheses`,`By rarity: ${fmt(Gallery.countBy('rarity'))} · by era: ${fmt(Gallery.countBy('title'))} · newest first · codes are rebuilt when shown`);
+  const g=el('div','gallery');c.append(g);let shown=0;for(let i=Gallery.entries.length-1;i>=0&&shown<36;i--,shown++){const e=Gallery.entries[i],r=decode(e.code),cell=el('div','g-cell');
+    if(r.ok){cell.append(artCanvas(r.sim.trace,true,false,'thumb'),btn(`${titleCase(e.title)} · ${e.rarity}`,()=>{S.sim=r.sim;S.era=r.era;S.role=r.role;pieceScreen(r.sim,e,`Rebuilt from its code · log hash ${r.hash.slice(0,16)}…`,false);},'btn small'));}
+    else cell.append(el('p','muted',`${e.title} — cannot rebuild: ${r.reason}`));g.append(cell);}
+  if(!Gallery.entries.length)g.append(el('p','muted','No syntheses yet. Run Auto mode to collect some.'));
+  const row=el('div','row');if(fromAuto)row.append(btn('← Back to auto (new run)',autoStart,'btn'));row.append(btn('Menu',showMenu,'btn'));c.append(row);}
+window.addEventListener('resize',()=>{if(P.micro&&P.micro.isConnected)drawMicro();});
+window.SDApp={showMenu,state:S,decode,encode,insight};
+showMenu();
+})();
+</script>
+</body></html>
